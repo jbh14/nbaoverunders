@@ -2,27 +2,42 @@ package main
 
 import (
 	"flag"
-	"log"
+	"log/slog"
 	"net/http"
+	"os"
 )
+
+type application struct {
+	logger *slog.Logger
+}
 
 func main() {
 
 	addr := flag.String("addr", ":4000", "HTTP network address")
-
 	flag.Parse()
+
+	// create custom logger, including outputting the log source
+	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		AddSource: true,
+	}))
+
+	app := &application{
+		logger: logger,
+	}
 
 	mux := http.NewServeMux()
 
 	fileServer := http.FileServer(http.Dir("./ui/static/"))
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 
-	mux.HandleFunc("/", home)
-	mux.HandleFunc("/snippet/view", snippetView)
-	mux.HandleFunc("/snippet/create", snippetCreate)
+	mux.HandleFunc("/", app.home)
+	mux.HandleFunc("/snippet/view", app.snippetView)
+	mux.HandleFunc("/snippet/create", app.snippetCreate)
 
-	log.Printf("starting server on %s", *addr)
+	logger.Info("starting server", "addr", *addr)
 
 	err := http.ListenAndServe(*addr, mux)
-	log.Fatal(err)
+	
+	logger.Error(err.Error())
+	os.Exit(1)
 }
