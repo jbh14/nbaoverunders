@@ -7,11 +7,13 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"github.com/jbh14/nbaoverunders/internal/models"
 	_ "github.com/go-sql-driver/mysql"
 )
 
 type application struct {
 	logger *slog.Logger
+	entries *models.EntryModel
 }
 
 func main() {
@@ -32,11 +34,11 @@ func main() {
 		logger.Error(err.Error())
 		os.Exit(1)
 	}
-
 	defer db.Close()  // defer call so that connection pool is closed before the main() function exits
 
 	app := &application{
-		logger: logger,
+		logger: 	logger,
+		entries: 	&models.EntryModel{DB: db},
 	}
 
 	logger.Info("starting server", "addr", *addr)
