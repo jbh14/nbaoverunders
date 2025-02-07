@@ -1,10 +1,13 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"html/template"
 	"net/http"
 	"strconv"
+
+	"github.com/jbh14/nbaoverunders/internal/models"
 )
 
 // home is where "all entries" will show up
@@ -39,7 +42,17 @@ func (app *application) entryView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	fmt.Fprintf(w, "Display a specific entry with ID %d...", id)
+	entry, err := app.entries.Get(id)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRecord) {
+			app.notFound(w)
+		} else {
+			app.serverError(w, r, err)
+		}
+		return
+	}
+	// Write the entry data as a plain-text HTTP response body.
+	fmt.Fprintf(w, "%+v", entry)
 }
 
 func (app *application) entryCreate(w http.ResponseWriter, r *http.Request) {
@@ -48,6 +61,19 @@ func (app *application) entryCreate(w http.ResponseWriter, r *http.Request) {
 		app.clientError(w, http.StatusMethodNotAllowed)
 		return
 	}
+
+	// Create some variables holding dummy data. We'll remove these later on
+	// during the build.
+	playerName := "Tommy B"
+	year := 2025
+
+	// Pass the data to the EntryModel.Insert() method, receiving the
+	// ID of the new record back.
+	id, err := app.entries.Insert(playerName, year)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
 	
-	w.Write([]byte("Create a new entry..."))
+	http.Redirect(w, r, fmt.Sprintf("/entry/view?id=%d", id), http.StatusSeeOther)
 }

@@ -21,7 +21,7 @@ func main() {
 	addr := flag.String("addr", ":4000", "HTTP network address")
 
 	sqlWebUserPassword := "R3dmountain"
-	dsn := flag.String("dsn", "web:" + sqlWebUserPassword + "@/snippetbox?parseTime=true", "MySQL data source name")
+	dsn := flag.String("dsn", "web:" + sqlWebUserPassword + "@/nbaoverunders?parseTime=true", "MySQL data source name")
 	flag.Parse()
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
