@@ -64,12 +64,12 @@ func (app *application) entryCreate(w http.ResponseWriter, r *http.Request) {
 
 	// Create some variables holding dummy data. We'll remove these later on
 	// during the build.
-	playerName := "Tommy B"
+	playername := "Tommy B"
 	year := 2025
 
 	// Pass the data to the EntryModel.Insert() method, receiving the
 	// ID of the new record back.
-	id, err := app.entries.Insert(playerName, year)
+	id, err := app.entries.Insert(playername, year)
 	if err != nil {
 		app.serverError(w, r, err)
 		return

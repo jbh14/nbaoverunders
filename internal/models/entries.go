@@ -21,17 +21,15 @@ type EntryModel struct {
 }
 
 // This will insert a new player entry into the database.
-func (m *EntryModel) Insert(playerName string, year int) (int, error) {
-	// default Points to 0 on creation? 
-	return 0, nil
+func (m *EntryModel) Insert(playername string, year int) (int, error) {
 
-	// SQL statement to execute
-	stmt := `INSERT INTO entries (playername, year, points, created)
-	VALUES(?, ?, 0, UTC_TIMESTAMP() )`
+	// SQL statement to execute - default to 0 on creation
+	stmt := `INSERT INTO entries (playername, year, created)
+	VALUES(?, ?, UTC_TIMESTAMP())`
 
 	
 	// use Exec() method on the embedded connection pool to execute the statement
-	result, err := m.DB.Exec(stmt, playerName, year)
+	result, err := m.DB.Exec(stmt, playername, year)
 		if err != nil {
 		return 0, err
 	}
