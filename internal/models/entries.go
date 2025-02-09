@@ -24,7 +24,7 @@ type EntryModel struct {
 func (m *EntryModel) Insert(playername string, year int) (int, error) {
 
 	// SQL statement to execute - default to 0 on creation
-	stmt := `INSERT INTO entries (playername, year, created)
+	stmt := `INSERT INTO nbaoverunders.entries (playername, year, created)
 	VALUES(?, ?, UTC_TIMESTAMP())`
 
 	
@@ -48,7 +48,7 @@ func (m *EntryModel) Insert(playername string, year int) (int, error) {
 
 // This will return a specific Entry based on its id.
 func (m *EntryModel) Get(id int) (Entry, error) {
-	stmt := `SELECT id, playername, year, created FROM entries
+	stmt := `SELECT id, playername, year, created FROM nbaoverunders.entries
 			WHERE id = ?`
 	
 	row := m.DB.QueryRow(stmt, id)

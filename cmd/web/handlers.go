@@ -51,6 +51,7 @@ func (app *application) entryView(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
+
 	// Write the entry data as a plain-text HTTP response body.
 	fmt.Fprintf(w, "%+v", entry)
 }
@@ -66,6 +67,9 @@ func (app *application) entryCreate(w http.ResponseWriter, r *http.Request) {
 	// during the build.
 	playername := "Tommy B"
 	year := 2025
+
+	// @BOOKMARK - not displaying here
+	app.logger.Error("Attempting to insert entry: playername=%s, year=%d", playername, year)
 
 	// Pass the data to the EntryModel.Insert() method, receiving the
 	// ID of the new record back.
