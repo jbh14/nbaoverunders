@@ -65,11 +65,11 @@ func (app *application) entryCreate(w http.ResponseWriter, r *http.Request) {
 
 	// Create some variables holding dummy data. We'll remove these later on
 	// during the build.
-	playername := "Tommy B"
+	playername := "Dan Phelan"
 	year := 2025
 
-	// @BOOKMARK - not displaying here
-	app.logger.Error("Attempting to insert entry: playername=%s, year=%d", playername, year)
+	// Logging for troubleshooting
+	app.logger.Info(fmt.Sprintf("Attempting to insert entry: playername=%s, year=%d", playername, year))
 
 	// Pass the data to the EntryModel.Insert() method, receiving the
 	// ID of the new record back.
@@ -78,6 +78,7 @@ func (app *application) entryCreate(w http.ResponseWriter, r *http.Request) {
 		app.serverError(w, r, err)
 		return
 	}
-	
+
+	app.logger.Info(fmt.Sprintf("Successfully inserted entry, assigned id=%d", id))
 	http.Redirect(w, r, fmt.Sprintf("/entry/view?id=%d", id), http.StatusSeeOther)
 }
