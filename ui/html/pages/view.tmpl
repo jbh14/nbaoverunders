@@ -1,0 +1,15 @@
+{{define "title"}}Entry #{{.ID}}{{end}}
+
+{{define "main"}}
+	<div class='snippet'>
+		<div class='metadata'>
+			<strong>{{.PlayerName}}</strong>
+			<strong>{{.Year}}</strong>
+			<span>#{{.ID}}</span>
+		</div>
+		<pre><code>{{.Points}}</code></pre>
+		<div class='metadata'>
+			<time>Created: {{.Created}}</time>
+		</div>
+	</div>
+{{end}}
