@@ -75,9 +75,14 @@ func (app *application) entryView(w http.ResponseWriter, r *http.Request) {
 		app.serverError(w, r, err)
 		return
 	}
+
+	//  Create an instance of a templateData struct holding the entry data
+	data := templateData{
+		Entry: entry,
+	}
 	
 	// execute templates and pass entry as final parameter
-	err = ts.ExecuteTemplate(w, "base", entry)
+	err = ts.ExecuteTemplate(w, "base", data)
 	if err != nil {
 		app.serverError(w, r, err)
 	}
