@@ -3,10 +3,8 @@ package main
 import (
 	"errors"
 	"fmt"
-	"html/template"
 	"net/http"
 	"strconv"
-
 	"github.com/jbh14/nbaoverunders/internal/models"
 )
 
@@ -23,28 +21,10 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	files := []string{
-		"./ui/html/base.tmpl",
-		"./ui/html/partials/nav.tmpl",
-		"./ui/html/pages/home.tmpl",
-	}
-
-	ts, err := template.ParseFiles(files...)
-	if err != nil {
-		app.serverError(w, r, err)
-		return
-	}
-
-	// Create instance of a templateData struct holding the slice of entries
-	data := templateData{
+	// render helper
+	app.render(w, r, http.StatusOK, "home.tmpl", templateData{
 		Entries: entries,
-	}
-	
-	// Pass in the templateData struct when executing the template
-	err = ts.ExecuteTemplate(w, "base", data)
-	if err != nil {
-		app.serverError(w, r, err)
-	}
+	})
 }
 
 func (app *application) entryView(w http.ResponseWriter, r *http.Request) {
@@ -64,30 +44,10 @@ func (app *application) entryView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// paths to the view.tmpl file plus the base layout and navigation partial
-	files := []string{
-		"./ui/html/base.tmpl",
-		"./ui/html/partials/nav.tmpl",
-		"./ui/html/pages/view.tmpl",
-	}
-	
-	// Parse the template files
-	ts, err := template.ParseFiles(files...)
-	if err != nil {
-		app.serverError(w, r, err)
-		return
-	}
-
-	//  Create an instance of a templateData struct holding the entry data
-	data := templateData{
+	// render helper
+	app.render(w, r, http.StatusOK, "view.tmpl", templateData{
 		Entry: entry,
-	}
-	
-	// execute templates and pass entry as final parameter
-	err = ts.ExecuteTemplate(w, "base", data)
-	if err != nil {
-		app.serverError(w, r, err)
-	}
+	})
 }
 
 func (app *application) entryCreate(w http.ResponseWriter, r *http.Request) {
