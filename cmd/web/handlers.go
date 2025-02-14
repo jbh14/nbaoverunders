@@ -22,27 +22,29 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		app.serverError(w, r, err)
 		return
 	}
-	for _, entry := range entries {
-		fmt.Fprintf(w, "%+v\n", entry)
+	
+	files := []string{
+		"./ui/html/base.tmpl",
+		"./ui/html/partials/nav.tmpl",
+		"./ui/html/pages/home.tmpl",
 	}
 
-	// will uncomment later, just getting entry view working right now
-	//files := []string{
-	//	"./ui/html/base.tmpl",
-	//	"./ui/html/partials/nav.tmpl",
-	//	"./ui/html/pages/home.tmpl",
-	//}
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
 
-	//ts, err := template.ParseFiles(files...)
-	//if err != nil {
-	//	app.serverError(w, r, err)
-	//	return
-	//}
-
-	//err = ts.ExecuteTemplate(w, "base", nil)
-	//if err != nil {
-	//	app.serverError(w, r, err)
-	//}
+	// Create instance of a templateData struct holding the slice of entries
+	data := templateData{
+		Entries: entries,
+	}
+	
+	// Pass in the templateData struct when executing the template
+	err = ts.ExecuteTemplate(w, "base", data)
+	if err != nil {
+		app.serverError(w, r, err)
+	}
 }
 
 func (app *application) entryView(w http.ResponseWriter, r *http.Request) {

@@ -1,15 +1,17 @@
 {{define "title"}}Entry #{{.Entry.ID}}{{end}}
 
 {{define "main"}}
+	{{with .Entry}}
 	<div class='snippet'>
 		<div class='metadata'>
-			<strong>{{.Entry.PlayerName}}</strong>
-			<strong>{{.Entry.Year}}</strong>
-			<span>#{{.Entry.ID}}</span>
+			<strong>{{.PlayerName}}</strong>
+			<strong>{{.Year}}</strong>
+			<span>#{{.ID}}</span>
 		</div>
-		<pre><code>{{.Entry.Points}}</code></pre>
+		<pre><code>{{.Points}}</code></pre>
 		<div class='metadata'>
-			<time>Created: {{.Entry.Created}}</time>
+			<time>Created: {{.Created}}</time>
 		</div>
 	</div>
+	{{end}}
 {{end}}
