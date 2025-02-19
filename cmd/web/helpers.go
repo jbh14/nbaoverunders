@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"runtime/debug"
 	"fmt"
+	"bytes"
 )
 
 func (app *application) serverError(w http.ResponseWriter, r *http.Request, err error) {
@@ -33,13 +34,18 @@ func (app *application) render(w http.ResponseWriter, r *http.Request, status in
 		app.serverError(w, r, err)
 		return
 	}
-	
-	// write out provided HTTP status code ('200 OK', '400 Bad Request' etc)
-	w.WriteHeader(status)
-	
-	// execute the template set and write the response body
-	err := ts.ExecuteTemplate(w, "base", data)
+
+	// Initialize a new buffer and write template to the buffer
+	// if there is an error, call "servererror" helper
+	buf := new(bytes.Buffer)
+	err := ts.ExecuteTemplate(buf, "base", data)
 	if err != nil {
 		app.serverError(w, r, err)
+		return
 	}
+	
+	// if template written to buffer without errors, write HTTP status code to http.responsewriter
+	w.WriteHeader(status)
+	
+	buf.WriteTo(w)
 }
