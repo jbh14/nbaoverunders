@@ -21,10 +21,12 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
+	// get templateData struct containing "default" data
+	data := app.newTemplateData(r)
+	data.Entries = entries
+
 	// render helper
-	app.render(w, r, http.StatusOK, "home.tmpl", templateData{
-		Entries: entries,
-	})
+	app.render(w, r, http.StatusOK, "home.tmpl", data)
 }
 
 func (app *application) entryView(w http.ResponseWriter, r *http.Request) {
@@ -44,10 +46,12 @@ func (app *application) entryView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+		// get templateData struct containing "default" data
+	data := app.newTemplateData(r)
+	data.Entry = entry
+
 	// render helper
-	app.render(w, r, http.StatusOK, "view.tmpl", templateData{
-		Entry: entry,
-	})
+	app.render(w, r, http.StatusOK, "view.tmpl", data)
 }
 
 func (app *application) entryCreate(w http.ResponseWriter, r *http.Request) {
