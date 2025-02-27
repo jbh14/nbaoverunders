@@ -6,23 +6,30 @@ services:
     container_name: mysql_container
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword  # Hardcoded credentials
-      MYSQL_DATABASE: mydatabase
-      MYSQL_USER: myuser
-      MYSQL_PASSWORD: mypassword
+      MYSQL_ROOT_PASSWORD: 'rootpassword'  # Hardcoded credentials
+      MYSQL_DATABASE: 'nbaoverunders' 
+      MYSQL_USER: 'web2' 
+      MYSQL_PASSWORD: 'mypassword' # this is not the real password web2 has in MySQL
     ports:
-      - "3306:3306"
+      - '3307:3306' # (host:container)
+    expose:
+      - '3306'
     volumes:
-      - mysql_data:/var/lib/mysql
+      - mysql_data:/var/lib/mysql 
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # Mount SQL script to seed some records
 
-  app:
-    build: .
-    container_name: go_app_container
-    restart: always
-    depends_on:
-      - mysql
-    ports:
-      - "4000:4000"
+#  app:
+#    build: .
+#    container_name: go_app_container
+#    restart: always
+#    depends_on:
+#      - mysql
+#    ports:
+#      - "4000:4000"
 
 volumes:
   mysql_data:
+
+# docker compose -f docker-compose.yml up --build
+# after changes: docker compose down -v
+# separate terminal: mysql -h 127.0.0.1 -P 3307 -u web2 -p
