@@ -18,14 +18,21 @@ services:
       - mysql_data:/var/lib/mysql 
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # Mount SQL script to seed some records
 
-#  app:
-#    build: .
-#    container_name: go_app_container
-#    restart: always
-#    depends_on:
-#      - mysql
-#    ports:
-#      - "4000:4000"
+  app:
+    build: .
+    container_name: go_app_container
+    restart: always
+    depends_on:
+      - mysql
+    ports:
+      - "4000:4000"
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=web2
+      - DB_PASSWORD=mypassword
+      - DB_NAME=nbaoverunders
+    command: ["/app/nbaoverunders"]
 
 volumes:
   mysql_data:
