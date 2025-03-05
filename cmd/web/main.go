@@ -7,13 +7,14 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
-	"github.com/jbh14/nbaoverunders/internal/models"
+
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/jbh14/nbaoverunders/internal/models"
 )
 
 type application struct {
-	logger *slog.Logger
-	entries *models.EntryModel
+	logger        *slog.Logger
+	entries       *models.EntryModel
 	templateCache map[string]*template.Template
 }
 
@@ -22,7 +23,7 @@ func main() {
 	addr := flag.String("addr", ":4000", "HTTP network address")
 
 	sqlWebUserPassword := "R3dmountain"
-	dsn := flag.String("dsn", "web2:" + sqlWebUserPassword + "@/nbaoverunders?parseTime=true", "MySQL data source name")
+	dsn := flag.String("dsn", "web2:"+sqlWebUserPassword+"@tcp(mysql:3306)/nbaoverunders?parseTime=true", "MySQL data source name")
 	flag.Parse()
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
@@ -35,7 +36,7 @@ func main() {
 		logger.Error(err.Error())
 		os.Exit(1)
 	}
-	defer db.Close()  // defer call so that connection pool is closed before the main() function exits
+	defer db.Close() // defer call so that connection pool is closed before the main() function exits
 
 	// Initialize a new template cache
 	templateCache, err := newTemplateCache()
@@ -45,9 +46,9 @@ func main() {
 	}
 
 	app := &application{
-		logger: 	logger,
-		entries: 	&models.EntryModel{DB: db},
-		templateCache : templateCache,
+		logger:        logger,
+		entries:       &models.EntryModel{DB: db},
+		templateCache: templateCache,
 	}
 
 	logger.Info("starting server", "addr", *addr)
@@ -69,3 +70,5 @@ func openDB(dsn string) (*sql.DB, error) {
 	}
 	return db, nil
 }
+
+// go run ./cmd/web

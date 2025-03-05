@@ -17,13 +17,17 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql 
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # Mount SQL script to seed some records
-
+    healthcheck:
+        test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+        interval: 10s
+        retries: 5
   app:
     build: .
     container_name: go_app_container
     restart: always
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     ports:
       - "4000:4000"
     environment:
@@ -32,7 +36,7 @@ services:
       - DB_USER=web2
       - DB_PASSWORD=mypassword
       - DB_NAME=nbaoverunders
-    command: ["/app/nbaoverunders"]
+    command: ["/app/nbaoverunders","-dsn=web2:mypassword@tcp(mysql:3306)/nbaoverunders?parseTime=true"]
 
 volumes:
   mysql_data:
