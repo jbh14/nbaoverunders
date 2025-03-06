@@ -3,6 +3,11 @@ version: "3.8"
 services:
   mysql:
     image: mysql:8.0
+    expose:
+      - '3306'
+    # needed for testing mysql service independently, but omit for building container with go app
+    #ports:
+    #  - '3307:3306' # (host:container)
     container_name: mysql_container
     restart: always
     environment:
@@ -10,37 +15,19 @@ services:
       MYSQL_DATABASE: 'nbaoverunders' 
       MYSQL_USER: 'web2' 
       MYSQL_PASSWORD: 'mypassword' # this is not the real password web2 has in MySQL
-    ports:
-      - '3307:3306' # (host:container)
-    expose:
-      - '3306'
-    volumes:
-      - mysql_data:/var/lib/mysql 
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # Mount SQL script to seed some records
-    healthcheck:
-        test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-        interval: 10s
-        retries: 5
   app:
-    build: .
-    container_name: go_app_container
-    restart: always
-    depends_on:
-      mysql:
-        condition: service_healthy
+    build:
+      context: .
+      dockerfile: dockerfile
     ports:
       - "4000:4000"
+    depends_on:
+      - mysql
     environment:
-      - DB_HOST=mysql
-      - DB_PORT=3306
-      - DB_USER=web2
-      - DB_PASSWORD=mypassword
-      - DB_NAME=nbaoverunders
-    command: ["/app/nbaoverunders","-dsn=web2:mypassword@tcp(mysql:3306)/nbaoverunders?parseTime=true"]
-
-volumes:
-  mysql_data:
+      DB_HOST: 'mysql'
 
 # docker compose -f docker-compose.yml up --build
 # after changes: docker compose down -v
 # separate terminal: mysql -h 127.0.0.1 -P 3307 -u web2 -p
+
+# reference: https://www.youtube.com/watch?v=p0n90IUfjp4

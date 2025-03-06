@@ -1,13 +1,15 @@
+# note : dockerfile run from the perspective of the docker-compose.yml file
+
 # --- Build Stage ---
 FROM golang:1.22 AS builder
 
 WORKDIR /app
 
-# Copy dependencies first for better caching
-COPY go.mod ./
+# install go dependencies
+COPY go.mod go.sum ./
 RUN go mod download
 
-# Copy the entire source code
+# Copy the source code
 COPY . .
 
 # Build the Go app (targeting correct package)

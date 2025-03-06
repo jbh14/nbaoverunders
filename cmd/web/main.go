@@ -24,6 +24,7 @@ func main() {
 
 	sqlWebUserPassword := "R3dmountain"
 	dsn := flag.String("dsn", "web2:"+sqlWebUserPassword+"@tcp(mysql:3306)/nbaoverunders?parseTime=true", "MySQL data source name")
+	// note - is nbaoverunders the correct database name?
 	flag.Parse()
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
