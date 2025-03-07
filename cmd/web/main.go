@@ -22,7 +22,8 @@ func main() {
 
 	addr := flag.String("addr", ":4000", "HTTP network address")
 
-	sqlWebUserPassword := "R3dmountain"
+	//sqlWebUserPassword := "R3dmountain"
+	sqlWebUserPassword := "mypassword"
 	dsn := flag.String("dsn", "web2:"+sqlWebUserPassword+"@tcp(mysql:3306)/nbaoverunders?parseTime=true", "MySQL data source name")
 	// note - is nbaoverunders the correct database name?
 	flag.Parse()

@@ -12,8 +12,10 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: 'rootpassword'  # Hardcoded credentials
       MYSQL_DATABASE: 'nbaoverunders' 
-      MYSQL_USER: 'web2' 
-      MYSQL_PASSWORD: 'mypassword' # this is not the real password web2 has in MySQL
+      MYSQL_USER: 'web2'  # this and the below need to match password in main.go
+      MYSQL_PASSWORD: 'mypassword' 
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
   app:
     build:
       context: .
@@ -27,22 +29,23 @@ services:
     depends_on:
       - mysql
     entrypoint:
-      - bash
-      - -c
-      - |
-        set -e
-        echo 'Waiting for MySQL to be available'
-        maxTries=10
-        while [ "$$maxTries" -gt 0 ] && ! mysqladmin ping -h "$$DB_HOST" -u"$$DB_USER" -p"$$DB_PASSWORD" --silent; do
-            sleep 1
-            maxTries=$((maxTries - 1))
-        done
-        echo
-        if [ "$$maxTries" -le 0 ]; then
-            echo >&2 'error: unable to contact MySQL after 10 tries'
-            exit 1
-        fi
-        exec /opt/files/startup.sh
+    - bash
+    - -c
+    - |
+      set -e
+      echo 'Waiting for MySQL to be available'
+      maxTries=10
+      while [ "$$maxTries" -gt 0 ] && ! mysqladmin ping -h "$$DB_HOST" -u"$$DB_USER" -p"$$DB_PASSWORD" --silent; do
+          sleep 1
+          maxTries=$((maxTries - 1))
+      done
+      echo
+      if [ "$$maxTries" -le 0 ]; then
+          echo >&2 'error: unable to contact MySQL after 10 tries'
+          exit 1
+      fi
+      # Run the Go app directly without startup.sh
+      exec ./nbaoverunders
     
 
 # docker compose -f docker-compose.yml up --build

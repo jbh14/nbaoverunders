@@ -7,13 +7,12 @@ import (
 )
 
 type Entry struct {
-	ID int
+	ID         int
 	PlayerName string
-	Year int
-	Points float32
-	Created time.Time
+	Year       int
+	Points     float32
+	Created    time.Time
 }
-
 
 // Define a EntryModel type which wraps a sql.DB connection pool.
 type EntryModel struct {
@@ -27,20 +26,19 @@ func (m *EntryModel) Insert(playername string, year int) (int, error) {
 	stmt := `INSERT INTO nbaoverunders.entries (playername, year, created)
 	VALUES(?, ?, UTC_TIMESTAMP())`
 
-	
 	// use Exec() method on the embedded connection pool to execute the statement
 	result, err := m.DB.Exec(stmt, playername, year)
-		if err != nil {
+	if err != nil {
 		return 0, err
 	}
-	
+
 	// Use the LastInsertId() method on the result to get the ID of our
 	// newly inserted record in the entries table.
 	id, err := result.LastInsertId()
 	if err != nil {
 		return 0, err
 	}
-	
+
 	// The ID returned has the type int64, so we convert it to an int type
 	// before returning.
 	return int(id), nil
@@ -50,12 +48,12 @@ func (m *EntryModel) Insert(playername string, year int) (int, error) {
 func (m *EntryModel) Get(id int) (Entry, error) {
 	stmt := `SELECT id, playername, year, created FROM nbaoverunders.entries
 			WHERE id = ?`
-	
+
 	row := m.DB.QueryRow(stmt, id)
-	
+
 	// Initialize a new zeroed Entry struct.
 	var e Entry
-	
+
 	// args to row.Scan are *pointers* to the place we want to copy the data into,
 	// and the number of args must be exactly the same as the number of
 	// columns returned by SQL statement
@@ -76,8 +74,8 @@ func (m *EntryModel) Get(id int) (Entry, error) {
 // This will return the 10 most recently created entries.
 func (m *EntryModel) Latest() ([]Entry, error) {
 	stmt := `SELECT id, playername, year, points, created FROM nbaoverunders.entries
-	WHERE year >= 2025 ORDER BY id DESC LIMIT 20`
-	
+	WHERE year >= 2024 ORDER BY id DESC LIMIT 20`
+
 	// Query() method on the connection pool returns a sql.Rows resultset containing the query result
 	rows, err := m.DB.Query(stmt)
 	if err != nil {
@@ -98,10 +96,10 @@ func (m *EntryModel) Latest() ([]Entry, error) {
 	// resultset automatically closes itself and frees-up the underlying
 	// database connection
 	for rows.Next() {
-		
+
 		// Create a pointer to a new zeroed Entry struct.
 		var e Entry
-	
+
 		// Use rows.Scan() to copy the values from each field in the row to the
 		// new Entry object that we created
 		// arguments to row.Scan() must be pointers to the place you want to copy the data into
@@ -109,7 +107,7 @@ func (m *EntryModel) Latest() ([]Entry, error) {
 		if err != nil {
 			return nil, err
 		}
-		
+
 		// Append it to the slice of entries
 		entries = append(entries, e)
 	}
@@ -120,7 +118,7 @@ func (m *EntryModel) Latest() ([]Entry, error) {
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
-	
+
 	// If everything went OK then return the Entries slice
 	return entries, nil
 }
