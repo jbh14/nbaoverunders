@@ -1,13 +1,12 @@
 version: "3.8"
-
 services:
   mysql:
-    image: mysql:8.0
+    image: mysql
     expose:
       - '3306'
     # needed for testing mysql service independently, but omit for building container with go app
-    #ports:
-    #  - '3307:3306' # (host:container)
+    ports:
+      - '3307:3306' # (host:container)
     container_name: mysql_container
     restart: always
     environment:
@@ -21,10 +20,30 @@ services:
       dockerfile: dockerfile
     ports:
       - "4000:4000"
+    environment: # for validating the connection to MySQL in "entrypoint" below
+      DB_HOST: 'mysql'
+      DB_USER: 'web2'
+      DB_PASSWORD: 'mypassword'
     depends_on:
       - mysql
-    environment:
-      DB_HOST: 'mysql'
+    entrypoint:
+      - bash
+      - -c
+      - |
+        set -e
+        echo 'Waiting for MySQL to be available'
+        maxTries=10
+        while [ "$$maxTries" -gt 0 ] && ! mysqladmin ping -h "$$DB_HOST" -u"$$DB_USER" -p"$$DB_PASSWORD" --silent; do
+            sleep 1
+            maxTries=$((maxTries - 1))
+        done
+        echo
+        if [ "$$maxTries" -le 0 ]; then
+            echo >&2 'error: unable to contact MySQL after 10 tries'
+            exit 1
+        fi
+        exec /opt/files/startup.sh
+    
 
 # docker compose -f docker-compose.yml up --build
 # after changes: docker compose down -v
