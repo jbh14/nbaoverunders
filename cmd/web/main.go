@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"fmt"
 	"html/template"
 	"log/slog"
 	"net/http"
@@ -22,15 +23,33 @@ func main() {
 
 	addr := flag.String("addr", ":4000", "HTTP network address")
 
-	//sqlWebUserPassword := "R3dmountain"
-	sqlWebUserPassword := "mypassword"
-	dsn := flag.String("dsn", "web2:"+sqlWebUserPassword+"@tcp(mysql:3306)/nbaoverunders?parseTime=true", "MySQL data source name")
-	// note - is nbaoverunders the correct database name?
-	flag.Parse()
-
+	// create a new logger earlier, so that we can log any errors that occur during the startup process (including reading env variables)
 	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
 		AddSource: true,
 	}))
+
+	// was using hard-coded credentials during testing/dev, but replace with env vars
+	dbUser := os.Getenv("DB_USER")
+	dbPass := os.Getenv("DB_PASSWORD")
+	dbName := os.Getenv("DB_NAME")
+
+	if dbUser == "" || dbPass == "" || dbName == "" {
+		logger.Error(fmt.Sprintf("dbUser: %s", dbUser))
+		logger.Error(fmt.Sprintf("dbPass: %s", dbPass))
+		logger.Error(fmt.Sprintf("dbName: %s", dbName))
+		logger.Error("missing required environment variables")
+		os.Exit(1)
+	}
+
+	//sqlWebUserPassword := "R3dmountain"
+	//sqlWebUserPassword := "mypassword"
+	dsn := flag.String("dsn", dbUser+":"+dbPass+"@tcp(mysql:3306)/"+dbName+"?parseTime=true", "MySQL data source name")
+
+	// building the DSN string directly without command line flag
+	//dsn := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?parseTime=true", dbUser, dbPass, dbHost, dbName)
+
+	// parse the command-line flags
+	flag.Parse()
 
 	// create sql.DB connection pool
 	db, err := openDB(*dsn)

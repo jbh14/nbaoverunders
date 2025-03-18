@@ -10,10 +10,10 @@ services:
     container_name: mysql_container
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: 'rootpassword'  # Hardcoded credentials
-      MYSQL_DATABASE: 'nbaoverunders' 
-      MYSQL_USER: 'web2'  # this and the below need to match password in main.go
-      MYSQL_PASSWORD: 'mypassword' 
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD} 
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
   app:
@@ -24,8 +24,11 @@ services:
       - "4000:4000"
     environment: # for validating the connection to MySQL in "entrypoint" below
       DB_HOST: 'mysql'
-      DB_USER: 'web2'
-      DB_PASSWORD: 'mypassword'
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+    #env_file:
+    #  - .env
     depends_on:
       - mysql
     entrypoint:
