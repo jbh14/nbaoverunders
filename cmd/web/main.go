@@ -32,6 +32,12 @@ func main() {
 	dbUser := os.Getenv("DB_USER")
 	dbPass := os.Getenv("DB_PASSWORD")
 	dbName := os.Getenv("DB_NAME")
+	unixSocketPath := os.Getenv("INSTANCE_UNIX_SOCKET")
+
+	// this would only be required in Cloud Run deployment
+	if unixSocketPath == "" {
+		logger.Error(fmt.Sprintf("unixSocketPath: %s", unixSocketPath))
+	}
 
 	if dbUser == "" || dbPass == "" || dbName == "" {
 		logger.Error(fmt.Sprintf("dbUser: %s", dbUser))
@@ -41,9 +47,15 @@ func main() {
 		os.Exit(1)
 	}
 
+	// for local testing
 	//sqlWebUserPassword := "R3dmountain"
 	//sqlWebUserPassword := "mypassword"
-	dsn := flag.String("dsn", dbUser+":"+dbPass+"@tcp(mysql:3306)/"+dbName+"?parseTime=true", "MySQL data source name")
+	//dsn := flag.String("dsn", dbUser+":"+dbPass+"@tcp(mysql:3306)/"+dbName+"?parseTime=true", "MySQL data source name")
+
+	// for google cloud run - maybe add if/then to use this vs above if unixSocketPath provided
+	dsn := flag.String("dsn", dbUser+":"+dbPass+"@unix("+unixSocketPath+")/"+dbName+"?parseTime=true", "MySQL data source name")
+	logger.Error(dsn)
+	logger.Error(fmt.Sprintf("dsn: %s", dsn))
 
 	// building the DSN string directly without command line flag
 	//dsn := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?parseTime=true", dbUser, dbPass, dbHost, dbName)
