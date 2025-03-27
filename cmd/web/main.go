@@ -28,37 +28,33 @@ func main() {
 		AddSource: true,
 	}))
 
-	// was using hard-coded credentials during testing/dev, but replace with env vars
+	// read env variables to determine the database connection details
 	dbUser := os.Getenv("DB_USER")
 	dbPass := os.Getenv("DB_PASSWORD")
 	dbName := os.Getenv("DB_NAME")
 	unixSocketPath := os.Getenv("INSTANCE_UNIX_SOCKET")
 
-	// this would only be required in Cloud Run deployment
+	// this would only be required and provided in Cloud Run deployment
 	if unixSocketPath == "" {
-		logger.Error(fmt.Sprintf("unixSocketPath: %s", unixSocketPath))
+		logger.Info(fmt.Sprintf("unixSocketPath: %s", unixSocketPath))
 	}
 
 	if dbUser == "" || dbPass == "" || dbName == "" {
-		logger.Error(fmt.Sprintf("dbUser: %s", dbUser))
-		logger.Error(fmt.Sprintf("dbPass: %s", dbPass))
-		logger.Error(fmt.Sprintf("dbName: %s", dbName))
-		logger.Error("missing required environment variables")
+		logger.Info(fmt.Sprintf("dbUser: %s", dbUser))
+		logger.Info(fmt.Sprintf("dbPass: %s", dbPass))
+		logger.Info(fmt.Sprintf("dbName: %s", dbName))
+		logger.Error("missing one or more required environment variables for SQL connection")
 		os.Exit(1)
 	}
 
-	// for local testing
-	//sqlWebUserPassword := "R3dmountain"
-	//sqlWebUserPassword := "mypassword"
-	//dsn := flag.String("dsn", dbUser+":"+dbPass+"@tcp(mysql:3306)/"+dbName+"?parseTime=true", "MySQL data source name")
-
-	// for google cloud run - maybe add if/then to use this vs above if unixSocketPath provided
-	dsn := flag.String("dsn", dbUser+":"+dbPass+"@unix("+unixSocketPath+")/"+dbName+"?parseTime=true", "MySQL data source name")
-	logger.Error(dsn)
-	logger.Error(fmt.Sprintf("dsn: %s", dsn))
-
-	// building the DSN string directly without command line flag
-	//dsn := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?parseTime=true", dbUser, dbPass, dbHost, dbName)
+	// for local testing - if we did not provide unixSocketPath
+	var dsn *string
+	if unixSocketPath == "" {
+		dsn = flag.String("dsn", dbUser+":"+dbPass+"@tcp(mysql:3306)/"+dbName+"?parseTime=true", "MySQL data source name")
+	} else { // for google cloud run - if we provided unixSocketPath
+		dsn = flag.String("dsn", dbUser+":"+dbPass+"@unix("+unixSocketPath+")/"+dbName+"?parseTime=true", "MySQL data source name")
+	}
+	logger.Info(*dsn)
 
 	// parse the command-line flags
 	flag.Parse()

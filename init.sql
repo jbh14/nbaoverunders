@@ -35,9 +35,84 @@ INSERT INTO entries (playername, year, points, created) VALUES (
 	UTC_TIMESTAMP()
 );
 
--- removing this for now as part of docker compose
--- create a web user - NO need to do this, already did as part of snippetbox
--- CREATE USER 'web'@'localhost';
--- GRANT SELECT, INSERT, UPDATE, DELETE ON entries.* TO 'web'@'localhost';
--- Important: Make sure to swap 'pass' with a password of your own choosing.
--- ALTER USER 'web'@'localhost' IDENTIFIED BY 'pass';
+-- create a "teams" table with an entry for each team
+CREATE TABLE teams (
+    id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    teamname VARCHAR(100) NOT NULL UNIQUE
+);
+
+-- create a "team seasons" table with an entry for each team for each year
+CREATE TABLE teamseasons (
+    id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    team_id INTEGER NOT NULL,
+    season_start_year INTEGER NOT NULL,
+	wins_actual INTEGER,
+	losses_actual INTEGER,
+	wins_line INTEGER,
+	losses_line INTEGER,
+	wins_projected INTEGER,
+	losses_projected INTEGER,
+	projected_over BOOLEAN,
+	confirmed_over BOOLEAN,
+    FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE
+);
+
+-- create team records and team seasons for all teams for 2024-2025 season
+INSERT INTO teams (teamname) VALUES
+    ('Atlanta Hawks'),
+    ('Boston Celtics'),
+    ('Brooklyn Nets'),
+    ('Charlotte Hornets'),
+    ('Chicago Bulls'),
+    ('Cleveland Cavaliers'),
+    ('Dallas Mavericks'),
+    ('Denver Nuggets'),
+    ('Detroit Pistons'),
+    ('Golden State Warriors'),
+    ('Houston Rockets'),
+    ('Indiana Pacers'),
+    ('Los Angeles Clippers'),
+    ('Los Angeles Lakers'),
+    ('Memphis Grizzlies'),
+    ('Miami Heat'),
+    ('Milwaukee Bucks'),
+    ('Minnesota Timberwolves'),
+    ('New Orleans Pelicans'),
+    ('New York Knicks'),
+    ('Oklahoma City Thunder'),
+    ('Orlando Magic'),
+    ('Philadelphia 76ers'),
+    ('Phoenix Suns'),
+    ('Portland Trail Blazers'),
+    ('Sacramento Kings'),
+    ('San Antonio Spurs'),
+    ('Toronto Raptors'),
+    ('Utah Jazz'),
+    ('Washington Wizards');
+
+-- Insert team seasons for the 2024-2025 season
+INSERT INTO teamseasons (team_id, season_start_year)
+SELECT id, 2024 FROM teams;
+
+-- create "picks" table
+CREATE TABLE picks (
+	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+	entry INTEGER NOT NULL,
+	teamseason_id INTEGER NOT NULL,
+	over_selected BOOLEAN,
+	lock BOOLEAN,
+	FOREIGN KEY (teamseason_id) REFERENCES teamseasons(id) ON DELETE CASCADE,
+	FOREIGN KEY (entry) REFERENCES entries(id) ON DELETE CASCADE
+);
+
+-- create a few "picks" entries here, but most will be added by the user
+INSERT INTO picks (entry, teamseason_id, over_selected, lock_selected)
+SELECT 
+    e.id, 
+    ts.id, 
+    TRUE, 
+    FALSE
+FROM entries e
+JOIN teamseasons ts ON ts.team_id = (SELECT id FROM teams WHERE teamname = 'Atlanta Hawks') 
+    AND ts.season_start_year = 2024
+WHERE e.playername = 'Brendan Heinz' AND e.year = 2024;
