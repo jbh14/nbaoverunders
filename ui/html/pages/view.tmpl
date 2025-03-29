@@ -12,6 +12,25 @@
 		<div class='metadata'>
 			<time>Created: {{humanDate .Created}}</time>
 		</div>
+
+		<!-- list of all picks associated with this entry --> 
+		{{if .Picks}}
+		<h3>Picks</h3>
+			<table>
+			<tr>
+				<th>Team Season ID</th>
+				<th>Over/Under</th>
+				<th>Lock</th>
+			</tr>
+			{{range .Picks}}
+			<tr>
+				<td>{{.TeamSeasonID}}</td>
+				<td>{{.OverSelected}}</td>
+				<td>{{.LockSelected}}</td>
+			</tr>
+			{{end}}
+			</table>
+		{{end}}
 	</div>
 	{{end}}
 {{end}}
