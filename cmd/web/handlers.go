@@ -3,8 +3,10 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
+
 	"github.com/jbh14/nbaoverunders/internal/models"
 )
 
@@ -20,7 +22,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		app.serverError(w, r, err)
 		return
 	}
-	
+
 	// get templateData struct containing "default" data
 	data := app.newTemplateData(r)
 	data.Entries = entries
@@ -35,7 +37,7 @@ func (app *application) entryView(w http.ResponseWriter, r *http.Request) {
 		app.notFound(w)
 		return
 	}
-	
+
 	entry, err := app.entries.Get(id)
 	if err != nil {
 		if errors.Is(err, models.ErrNoRecord) {
@@ -46,9 +48,12 @@ func (app *application) entryView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-		// get templateData struct containing "default" data
+	// get templateData struct containing "default" data
 	data := app.newTemplateData(r)
 	data.Entry = entry
+
+	log.Printf("Entry: %+v\n", entry)       // Debugging line
+	log.Printf("Picks: %+v\n", entry.Picks) // Check if picks are populated
 
 	// render helper
 	app.render(w, r, http.StatusOK, "view.tmpl", data)

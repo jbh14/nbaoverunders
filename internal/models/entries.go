@@ -12,6 +12,13 @@ type Entry struct {
 	Year       int
 	Points     float32
 	Created    time.Time
+	Picks      []Pick
+}
+
+type Pick struct {
+	TeamSeasonID int
+	OverSelected bool
+	LockSelected bool
 }
 
 // Define a EntryModel type which wraps a sql.DB connection pool.
@@ -66,6 +73,52 @@ func (m *EntryModel) Get(id int) (Entry, error) {
 			return Entry{}, err
 		}
 	}
+
+	// Step 2: Fetch the associated picks
+	stmt2 := `SELECT teamseason_id, over_selected, lock_selected 
+			  FROM nbaoverunders.picks 
+			  WHERE entry = ?`
+
+	pickrows, err2 := m.DB.Query(stmt2, id)
+	if err2 != nil {
+		return Entry{}, err2
+	}
+
+	if err2 != nil {
+		return Entry{}, err
+	}
+	defer pickrows.Close()
+
+	// empty slice to hold picks
+	var picks []Pick
+
+	// Step 3: Iterate over the rows and populate the Picks slice
+	for pickrows.Next() {
+
+		// Create a pointer to a new zeroed Pick struct.
+		var pick Pick
+
+		// Use rows.Scan() to copy the values from each field in the row to the
+		// new Entry object that we created
+		// arguments to row.Scan() must be pointers to the place you want to copy the data into
+		err = pickrows.Scan(&pick.TeamSeasonID, &pick.OverSelected, &pick.LockSelected)
+		if err != nil {
+			return Entry{}, err
+		}
+
+		// Append it to the slice of picks
+		picks = append(picks, pick)
+	}
+
+	// When the rows.Next() loop has finished, call rows.Err() to retrieve any
+	// error that was encountered during the iteration
+	// (don't assume that a successful iteration was completed over the whole resultset)
+	if err = pickrows.Err(); err != nil {
+		return Entry{}, err
+	}
+
+	// put the picks into the Entry struct
+	e.Picks = picks
 
 	// If everything went OK, then return the filled Entry struct.
 	return e, nil

@@ -100,12 +100,13 @@ CREATE TABLE picks (
 	entry INTEGER NOT NULL,
 	teamseason_id INTEGER NOT NULL,
 	over_selected BOOLEAN,
-	lock BOOLEAN,
+	lock_selected BOOLEAN,
 	FOREIGN KEY (teamseason_id) REFERENCES teamseasons(id) ON DELETE CASCADE,
 	FOREIGN KEY (entry) REFERENCES entries(id) ON DELETE CASCADE
 );
 
 -- create a few "picks" entries here, but most will be added by the user
+-- Brendan over on the Hawks
 INSERT INTO picks (entry, teamseason_id, over_selected, lock_selected)
 SELECT 
     e.id, 
@@ -114,5 +115,16 @@ SELECT
     FALSE
 FROM entries e
 JOIN teamseasons ts ON ts.team_id = (SELECT id FROM teams WHERE teamname = 'Atlanta Hawks') 
+    AND ts.season_start_year = 2024
+WHERE e.playername = 'Brendan Heinz' AND e.year = 2024;
+-- Brendan over on the Cavs
+INSERT INTO picks (entry, teamseason_id, over_selected, lock_selected)
+SELECT 
+    e.id, 
+    ts.id, 
+    TRUE, 
+    FALSE
+FROM entries e
+JOIN teamseasons ts ON ts.team_id = (SELECT id FROM teams WHERE teamname = 'Cleveland Cavaliers') 
     AND ts.season_start_year = 2024
 WHERE e.playername = 'Brendan Heinz' AND e.year = 2024;
