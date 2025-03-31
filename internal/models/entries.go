@@ -16,9 +16,16 @@ type Entry struct {
 }
 
 type Pick struct {
-	TeamSeasonID int
-	OverSelected bool
-	LockSelected bool
+	TeamSeasonID    int
+	TeamName        string
+	WinsActual      int
+	LossesActual    int
+	WinsLine        int
+	LossesLine      int
+	WinsProjected   int
+	LossesProjected int
+	OverSelected    bool
+	LockSelected    bool
 }
 
 // Define a EntryModel type which wraps a sql.DB connection pool.
@@ -75,9 +82,22 @@ func (m *EntryModel) Get(id int) (Entry, error) {
 	}
 
 	// Step 2: Fetch the associated picks
-	stmt2 := `SELECT teamseason_id, over_selected, lock_selected 
-			  FROM nbaoverunders.picks 
-			  WHERE entry = ?`
+	stmt2 := `SELECT 
+    			p.teamseason_id, 
+    			t.teamname, 
+				COALESCE(s.wins_actual, 0) AS wins_actual,
+				COALESCE(s.losses_actual, 0) AS losses_actual,
+				COALESCE(s.wins_line, 0) AS wins_line,
+				COALESCE(s.losses_line, 0) AS losses_line,
+				COALESCE(s.wins_projected, 0) AS wins_projected,
+				COALESCE(s.losses_projected, 0) AS losses_projected,
+				p.over_selected, 
+				p.lock_selected 
+			FROM nbaoverunders.picks p
+			INNER JOIN teamseasons s ON p.teamseason_id = s.id
+			INNER JOIN teams t ON s.team_id = t.id
+			WHERE s.season_start_year = 2024
+		     AND p.entry = ?;`
 
 	pickrows, err2 := m.DB.Query(stmt2, id)
 	if err2 != nil {
@@ -101,7 +121,7 @@ func (m *EntryModel) Get(id int) (Entry, error) {
 		// Use rows.Scan() to copy the values from each field in the row to the
 		// new Entry object that we created
 		// arguments to row.Scan() must be pointers to the place you want to copy the data into
-		err = pickrows.Scan(&pick.TeamSeasonID, &pick.OverSelected, &pick.LockSelected)
+		err = pickrows.Scan(&pick.TeamSeasonID, &pick.TeamName, &pick.WinsActual, &pick.LossesActual, &pick.WinsLine, &pick.LossesLine, &pick.WinsProjected, &pick.LossesProjected, &pick.OverSelected, &pick.LockSelected)
 		if err != nil {
 			return Entry{}, err
 		}

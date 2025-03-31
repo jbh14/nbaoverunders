@@ -18,15 +18,21 @@
 		<h3>Picks</h3>
 			<table>
 			<tr>
-				<th>Team Season ID</th>
+				<th>Team</th>
+				<th>Record</th>
+				<th>Wins Line Record</th>
+				<th>Projected Record</th>
 				<th>Over/Under</th>
 				<th>Lock</th>
 			</tr>
 			{{range .Picks}}
 			<tr>
-				<td>{{.TeamSeasonID}}</td>
-				<td>{{.OverSelected}}</td>
-				<td>{{.LockSelected}}</td>
+				<td>{{.TeamName}}</td>
+				<td>{{.WinsActual}} - {{.LossesActual}}</td>
+				<td>{{.WinsLine}} - {{.LossesLine}}</td>
+				<td>{{.WinsProjected}} - {{.LossesProjected}}</td>
+				<td>{{if .OverSelected}}OVER{{else}}UNDER{{end}}</td>
+				<td>{{if .LockSelected}}LOCK{{end}}</td>
 			</tr>
 			{{end}}
 			</table>
