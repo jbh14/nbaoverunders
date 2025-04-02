@@ -26,6 +26,7 @@ type Pick struct {
 	LossesProjected int
 	OverSelected    bool
 	LockSelected    bool
+	Points          float32
 }
 
 // Define a EntryModel type which wraps a sql.DB connection pool.
@@ -125,6 +126,7 @@ func (m *EntryModel) Get(id int) (Entry, error) {
 		if err != nil {
 			return Entry{}, err
 		}
+		pick.Points = float32(pick.WinsActual) - float32(pick.WinsLine)
 
 		// Append it to the slice of picks
 		picks = append(picks, pick)

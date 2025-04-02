@@ -94,6 +94,12 @@ INSERT INTO teams (teamname) VALUES
 INSERT INTO teamseasons (team_id, season_start_year)
 SELECT id, 2024 FROM teams;
 
+-- update Hawks season with wins and losses
+UPDATE teamseasons
+SET wins_actual = 26, losses_actual = 29, wins_line = 36.5
+WHERE season_start_year = 2024
+AND team_id = (SELECT ID FROM teams WHERE teamname = 'Atlanta Hawks');
+
 -- create "picks" table
 CREATE TABLE picks (
 	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,

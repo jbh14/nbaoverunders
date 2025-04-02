@@ -24,6 +24,7 @@
 				<th>Projected Record</th>
 				<th>Over/Under</th>
 				<th>Lock</th>
+				<th>Points</th>
 			</tr>
 			{{range .Picks}}
 			<tr>
@@ -33,6 +34,7 @@
 				<td>{{.WinsProjected}} - {{.LossesProjected}}</td>
 				<td>{{if .OverSelected}}OVER{{else}}UNDER{{end}}</td>
 				<td>{{if .LockSelected}}LOCK{{end}}</td>
+				<td>{{.Points}}</td>
 			</tr>
 			{{end}}
 			</table>
