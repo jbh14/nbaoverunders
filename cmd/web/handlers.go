@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"sort"
 	"strconv"
 
 	"github.com/jbh14/nbaoverunders/internal/models"
@@ -22,6 +23,11 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		app.serverError(w, r, err)
 		return
 	}
+
+	// sort by points (descending)
+	sort.Slice(entries, func(i, j int) bool {
+		return entries[i].Points > entries[j].Points
+	})
 
 	// get templateData struct containing "default" data
 	data := app.newTemplateData(r)

@@ -5,17 +5,15 @@
 	{{if .Entries}}
 	<table>
 		<tr>
-			<th>Player + Year</th>
+			<th>Player</th>
+			<th>Picks</th>
 			<th>Points</th>
-			<th>Created</th>
-			<th>ID</th>
 		</tr>
 		{{range .Entries}}
 		<tr>
-			<td><a href='/entry/view?id={{.ID}}'>{{.PlayerName}} {{.Year}}</a></td>
+			<td><a href='/entry/view?id={{.ID}}'>{{.PlayerName}}</a></td>
+			<td>PicksCount</td>
 			<td>{{.Points}}</td>
-			<td>{{humanDate .Created}}</td>
-			<td>#{{.ID}}</td>
 		</tr>
 		{{end}}
 	</table>

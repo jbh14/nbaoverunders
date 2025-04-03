@@ -9,7 +9,7 @@ CREATE TABLE entries (
 	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
 	playername VARCHAR(100) NOT NULL,
 	year INTEGER NOT NULL,
-	points DECIMAL(10, 2),
+    points DECIMAL(6,2) NOT NULL,
 	created DATETIME NOT NULL
 );
 -- Add an index on the created column.
@@ -48,8 +48,8 @@ CREATE TABLE teamseasons (
     season_start_year INTEGER NOT NULL,
 	wins_actual INTEGER,
 	losses_actual INTEGER,
-	wins_line DECIMAL(4,1),
-	losses_line DECIMAL(4,1),
+	wins_line DECIMAL(4,2),
+	losses_line DECIMAL(4,2),
 	wins_projected INTEGER,
 	losses_projected INTEGER,
 	projected_over BOOLEAN,
@@ -96,25 +96,25 @@ SELECT id, 2024 FROM teams;
 
 -- update Hawks season with wins and losses
 UPDATE teamseasons
-SET wins_actual = 36, losses_actual = 40, wins_line = 36.5
+SET wins_actual = 36, losses_actual = 40, wins_line = 36.50
 WHERE season_start_year = 2024
 AND team_id = (SELECT ID FROM teams WHERE teamname = 'Atlanta Hawks');
 
 -- update Cavs season with wins and losses
 UPDATE teamseasons
-SET wins_actual = 61, losses_actual = 15, wins_line = 48.5
+SET wins_actual = 61, losses_actual = 15, wins_line = 48.50
 WHERE season_start_year = 2024
 AND team_id = (SELECT ID FROM teams WHERE teamname = 'Cleveland Cavaliers');
 
 -- update Clippers season with wins and losses
 UPDATE teamseasons
-SET wins_actual = 44, losses_actual = 32, wins_line = 35.5
+SET wins_actual = 44, losses_actual = 32, wins_line = 35.50
 WHERE season_start_year = 2024
 AND team_id = (SELECT ID FROM teams WHERE teamname = 'Los Angeles Clippers');
 
 -- update Pacers season with wins and losses
 UPDATE teamseasons
-SET wins_actual = 45, losses_actual = 31, wins_line = 46.5
+SET wins_actual = 45, losses_actual = 31, wins_line = 46.50
 WHERE season_start_year = 2024
 AND team_id = (SELECT ID FROM teams WHERE teamname = 'Indiana Pacers');
 

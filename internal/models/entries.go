@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 	"errors"
+	"log"
 	"time"
 )
 
@@ -20,8 +21,7 @@ type Pick struct {
 	TeamName        string
 	WinsActual      int
 	LossesActual    int
-	WinsLine        float32
-	LossesLine      int
+	WinsLine        float64
 	WinsProjected   int
 	LossesProjected int
 	OverSelected    bool
@@ -89,7 +89,6 @@ func (m *EntryModel) Get(id int) (Entry, error) {
 				COALESCE(s.wins_actual, 0) AS wins_actual,
 				COALESCE(s.losses_actual, 0) AS losses_actual,
 				COALESCE(s.wins_line, 0) AS wins_line,
-				COALESCE(s.losses_line, 0) AS losses_line,
 				COALESCE(s.wins_projected, 0) AS wins_projected,
 				COALESCE(s.losses_projected, 0) AS losses_projected,
 				p.over_selected, 
@@ -114,6 +113,7 @@ func (m *EntryModel) Get(id int) (Entry, error) {
 	var picks []Pick
 
 	// Step 3: Iterate over the rows and populate the Picks slice
+	totalPoints := 0.0 // initialize totalPoints to 0
 	for pickrows.Next() {
 
 		// Create a pointer to a new zeroed Pick struct.
@@ -122,7 +122,7 @@ func (m *EntryModel) Get(id int) (Entry, error) {
 		// Use rows.Scan() to copy the values from each field in the row to the
 		// new Entry object that we created
 		// arguments to row.Scan() must be pointers to the place you want to copy the data into
-		err = pickrows.Scan(&pick.TeamSeasonID, &pick.TeamName, &pick.WinsActual, &pick.LossesActual, &pick.WinsLine, &pick.LossesLine, &pick.WinsProjected, &pick.LossesProjected, &pick.OverSelected, &pick.LockSelected)
+		err = pickrows.Scan(&pick.TeamSeasonID, &pick.TeamName, &pick.WinsActual, &pick.LossesActual, &pick.WinsLine, &pick.WinsProjected, &pick.LossesProjected, &pick.OverSelected, &pick.LockSelected)
 		if err != nil {
 			return Entry{}, err
 		}
@@ -137,6 +137,8 @@ func (m *EntryModel) Get(id int) (Entry, error) {
 		}
 		// Calculate the points based on the wins and losses, over/under selection, and lock
 		pick.Points = (float32(pick.WinsActual) - float32(pick.WinsLine)) * float32(overUnderMultiplier) * float32(lockMultiplier)
+		// Add the points to the total points
+		totalPoints += float64(pick.Points)
 
 		// Append it to the slice of picks
 		picks = append(picks, pick)
@@ -152,14 +154,32 @@ func (m *EntryModel) Get(id int) (Entry, error) {
 	// put the picks into the Entry struct
 	e.Picks = picks
 
+	// Step 4: Calculate the total points for the entry and update entry in the database
+	stmt3 := `UPDATE entries SET points = ? WHERE id = ?;`
+
+	// use Exec() method on the embedded connection pool to execute the statement
+	result, err := m.DB.Exec(stmt3, totalPoints, id)
+	if err != nil {
+		return Entry{}, err
+	}
+
+	// check for errors or no rows affected
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		log.Fatal(err)
+	}
+	if rowsAffected == 0 {
+		log.Println("no entries updated with current points")
+	}
+
 	// If everything went OK, then return the filled Entry struct.
 	return e, nil
 }
 
 // This will return the 10 most recently created entries.
 func (m *EntryModel) Latest() ([]Entry, error) {
-	stmt := `SELECT id, playername, year, points, created FROM nbaoverunders.entries
-	WHERE year >= 2024 ORDER BY id DESC LIMIT 20`
+	stmt := `SELECT id, playername, points, year, created FROM nbaoverunders.entries
+	WHERE year >= 2024 ORDER BY points DESC LIMIT 20`
 
 	// Query() method on the connection pool returns a sql.Rows resultset containing the query result
 	rows, err := m.DB.Query(stmt)
@@ -188,7 +208,7 @@ func (m *EntryModel) Latest() ([]Entry, error) {
 		// Use rows.Scan() to copy the values from each field in the row to the
 		// new Entry object that we created
 		// arguments to row.Scan() must be pointers to the place you want to copy the data into
-		err = rows.Scan(&e.ID, &e.PlayerName, &e.Year, &e.Points, &e.Created)
+		err = rows.Scan(&e.ID, &e.PlayerName, &e.Points, &e.Year, &e.Created)
 		if err != nil {
 			return nil, err
 		}
