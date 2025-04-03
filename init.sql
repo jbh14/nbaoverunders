@@ -48,8 +48,8 @@ CREATE TABLE teamseasons (
     season_start_year INTEGER NOT NULL,
 	wins_actual INTEGER,
 	losses_actual INTEGER,
-	wins_line INTEGER,
-	losses_line INTEGER,
+	wins_line DECIMAL(4,1),
+	losses_line DECIMAL(4,1),
 	wins_projected INTEGER,
 	losses_projected INTEGER,
 	projected_over BOOLEAN,
@@ -96,9 +96,28 @@ SELECT id, 2024 FROM teams;
 
 -- update Hawks season with wins and losses
 UPDATE teamseasons
-SET wins_actual = 26, losses_actual = 29, wins_line = 36.5
+SET wins_actual = 36, losses_actual = 40, wins_line = 36.5
 WHERE season_start_year = 2024
 AND team_id = (SELECT ID FROM teams WHERE teamname = 'Atlanta Hawks');
+
+-- update Cavs season with wins and losses
+UPDATE teamseasons
+SET wins_actual = 61, losses_actual = 15, wins_line = 48.5
+WHERE season_start_year = 2024
+AND team_id = (SELECT ID FROM teams WHERE teamname = 'Cleveland Cavaliers');
+
+-- update Clippers season with wins and losses
+UPDATE teamseasons
+SET wins_actual = 44, losses_actual = 32, wins_line = 35.5
+WHERE season_start_year = 2024
+AND team_id = (SELECT ID FROM teams WHERE teamname = 'Los Angeles Clippers');
+
+-- update Pacers season with wins and losses
+UPDATE teamseasons
+SET wins_actual = 45, losses_actual = 31, wins_line = 46.5
+WHERE season_start_year = 2024
+AND team_id = (SELECT ID FROM teams WHERE teamname = 'Indiana Pacers');
+
 
 -- create "picks" table
 CREATE TABLE picks (
@@ -123,6 +142,7 @@ FROM entries e
 JOIN teamseasons ts ON ts.team_id = (SELECT id FROM teams WHERE teamname = 'Atlanta Hawks') 
     AND ts.season_start_year = 2024
 WHERE e.playername = 'Brendan Heinz' AND e.year = 2024;
+
 -- Brendan over on the Cavs
 INSERT INTO picks (entry, teamseason_id, over_selected, lock_selected)
 SELECT 
@@ -132,5 +152,29 @@ SELECT
     FALSE
 FROM entries e
 JOIN teamseasons ts ON ts.team_id = (SELECT id FROM teams WHERE teamname = 'Cleveland Cavaliers') 
+    AND ts.season_start_year = 2024
+WHERE e.playername = 'Brendan Heinz' AND e.year = 2024;
+
+-- Brendan under on the Clippers
+INSERT INTO picks (entry, teamseason_id, over_selected, lock_selected)
+SELECT 
+    e.id, 
+    ts.id, 
+    FALSE, 
+    FALSE
+FROM entries e
+JOIN teamseasons ts ON ts.team_id = (SELECT id FROM teams WHERE teamname = 'Los Angeles Clippers') 
+    AND ts.season_start_year = 2024
+WHERE e.playername = 'Brendan Heinz' AND e.year = 2024;
+
+-- Brendan lock over on the Pacers
+INSERT INTO picks (entry, teamseason_id, over_selected, lock_selected)
+SELECT 
+    e.id, 
+    ts.id, 
+    TRUE, 
+    TRUE
+FROM entries e
+JOIN teamseasons ts ON ts.team_id = (SELECT id FROM teams WHERE teamname = 'Indiana Pacers') 
     AND ts.season_start_year = 2024
 WHERE e.playername = 'Brendan Heinz' AND e.year = 2024;

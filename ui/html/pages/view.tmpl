@@ -20,7 +20,7 @@
 			<tr>
 				<th>Team</th>
 				<th>Record</th>
-				<th>Wins Line Record</th>
+				<th>Wins Line</th>
 				<th>Projected Record</th>
 				<th>Over/Under</th>
 				<th>Lock</th>
@@ -30,11 +30,11 @@
 			<tr>
 				<td>{{.TeamName}}</td>
 				<td>{{.WinsActual}} - {{.LossesActual}}</td>
-				<td>{{.WinsLine}} - {{.LossesLine}}</td>
+				<td>{{printf "%.1f" .WinsLine}}</td>
 				<td>{{.WinsProjected}} - {{.LossesProjected}}</td>
 				<td>{{if .OverSelected}}OVER{{else}}UNDER{{end}}</td>
 				<td>{{if .LockSelected}}LOCK{{end}}</td>
-				<td>{{.Points}}</td>
+				<td>{{printf "%.1f" .Points}}</td>
 			</tr>
 			{{end}}
 			</table>

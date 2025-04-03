@@ -20,7 +20,7 @@ type Pick struct {
 	TeamName        string
 	WinsActual      int
 	LossesActual    int
-	WinsLine        int
+	WinsLine        float32
 	LossesLine      int
 	WinsProjected   int
 	LossesProjected int
@@ -126,7 +126,17 @@ func (m *EntryModel) Get(id int) (Entry, error) {
 		if err != nil {
 			return Entry{}, err
 		}
-		pick.Points = float32(pick.WinsActual) - float32(pick.WinsLine)
+		// multiplier for over/under and lock
+		overUnderMultiplier := 1
+		if !pick.OverSelected {
+			overUnderMultiplier = -1
+		}
+		lockMultiplier := 1
+		if pick.LockSelected {
+			lockMultiplier = 2
+		}
+		// Calculate the points based on the wins and losses, over/under selection, and lock
+		pick.Points = (float32(pick.WinsActual) - float32(pick.WinsLine)) * float32(overUnderMultiplier) * float32(lockMultiplier)
 
 		// Append it to the slice of picks
 		picks = append(picks, pick)
