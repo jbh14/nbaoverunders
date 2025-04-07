@@ -82,7 +82,7 @@ func (m *EntryModel) Get(id int) (Entry, error) {
 		}
 	}
 
-	// Step 2: Fetch the associated picks
+	// Step 2: Fetch the associated picks, ordered by team name (ascending)
 	stmt2 := `SELECT 
     			p.teamseason_id, 
     			t.teamname, 
@@ -97,7 +97,8 @@ func (m *EntryModel) Get(id int) (Entry, error) {
 			INNER JOIN teamseasons s ON p.teamseason_id = s.id
 			INNER JOIN teams t ON s.team_id = t.id
 			WHERE s.season_start_year = 2024
-		     AND p.entry = ?;`
+		     AND p.entry = ? 
+			 ORDER BY t.teamname ASC;`
 
 	pickrows, err2 := m.DB.Query(stmt2, id)
 	if err2 != nil {
@@ -151,7 +152,8 @@ func (m *EntryModel) Get(id int) (Entry, error) {
 		return Entry{}, err
 	}
 
-	// put the picks into the Entry struct
+	// put the picks and Points into the Entry struct
+	e.Points = float32(totalPoints)
 	e.Picks = picks
 
 	// Step 4: Calculate the total points for the entry and update entry in the database

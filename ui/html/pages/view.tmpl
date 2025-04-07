@@ -8,10 +8,11 @@
 			<strong>{{.Year}}</strong>
 			<span>#{{.ID}}</span>
 		</div>
-		<pre><code>{{.Points}}</code></pre>
-		<div class='metadata'>
+		<pre><code>{{.Points}} Points {{if .Picks}} on {{len .Picks}} Picks {{end}}</code></pre>
+
+		<!-- <div class='metadata'>
 			<time>Created: {{humanDate .Created}}</time>
-		</div>
+		</div> --> 
 
 		<!-- list of all picks associated with this entry --> 
 		{{if .Picks}}
@@ -21,7 +22,6 @@
 				<th>Team</th>
 				<th>Record</th>
 				<th>Wins Line</th>
-				<th>Projected Record</th>
 				<th>Over/Under</th>
 				<th>Lock</th>
 				<th>Points</th>
@@ -31,7 +31,6 @@
 				<td>{{.TeamName}}</td>
 				<td>{{.WinsActual}} - {{.LossesActual}}</td>
 				<td>{{printf "%.1f" .WinsLine}}</td>
-				<td>{{.WinsProjected}} - {{.LossesProjected}}</td>
 				<td>{{if .OverSelected}}OVER{{else}}UNDER{{end}}</td>
 				<td>{{if .LockSelected}}LOCK{{end}}</td>
 				<td>{{printf "%.1f" .Points}}</td>
