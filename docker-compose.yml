@@ -15,7 +15,7 @@ services:
       MYSQL_USER: ${DB_USER}
       MYSQL_PASSWORD: ${DB_PASSWORD} 
     volumes:
-      - ./mysql:/var/lib/mysql
+      - mysql-data:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
   app:
     build:
@@ -50,7 +50,8 @@ services:
       fi
       # Run the Go app directly without startup.sh
       exec ./nbaoverunders
-    
+volumes:
+  mysql-data:
 
 # docker compose -f docker-compose.yml up --build
 # after changes: docker compose down -v

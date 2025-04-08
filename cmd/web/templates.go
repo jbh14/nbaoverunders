@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"path/filepath"
 	"time"
+
 	"github.com/jbh14/nbaoverunders/internal/models"
 )
 
@@ -11,8 +12,8 @@ import (
 // any dynamic data that we want to pass to our HTML templates
 type templateData struct {
 	CurrentYear int
-	Entry 	models.Entry
-	Entries	[]models.Entry
+	Entry       models.Entry
+	Entries     []models.Entry
 }
 
 // humanDate functio - returns a formatted representation of a time.Time object.
@@ -39,7 +40,7 @@ func newTemplateCache() (map[string]*template.Template, error) {
 
 	// Loop through the page filepaths one-by-one
 	for _, page := range pages {
-		
+
 		// extract the file name (like 'home.tmpl') from the full filepath
 		name := filepath.Base(page)
 
