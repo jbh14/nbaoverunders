@@ -126,6 +126,7 @@ CREATE TABLE picks (
 	teamseason_id INTEGER NOT NULL,
 	over_selected BOOLEAN,
 	lock_selected BOOLEAN,
+    nosweat_lock_selected BOOLEAN,
 	FOREIGN KEY (teamseason_id) REFERENCES teamseasons(id) ON DELETE CASCADE,
 	FOREIGN KEY (entry) REFERENCES entries(id) ON DELETE CASCADE
 );

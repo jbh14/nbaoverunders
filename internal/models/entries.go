@@ -14,19 +14,21 @@ type Entry struct {
 	Points     float32
 	Created    time.Time
 	Picks      []Pick
+	Lock       string
 }
 
 type Pick struct {
-	TeamSeasonID    int
-	TeamName        string
-	WinsActual      int
-	LossesActual    int
-	WinsLine        float64
-	WinsProjected   int
-	LossesProjected int
-	OverSelected    bool
-	LockSelected    bool
-	Points          float32
+	TeamSeasonID        int
+	TeamName            string
+	WinsActual          int
+	LossesActual        int
+	WinsLine            float64
+	WinsProjected       int
+	LossesProjected     int
+	OverSelected        bool
+	LockSelected        bool
+	NosweatLockSelected bool
+	Points              float32
 }
 
 // Define a EntryModel type which wraps a sql.DB connection pool.
@@ -92,11 +94,12 @@ func (m *EntryModel) Get(id int) (Entry, error) {
 				COALESCE(s.wins_projected, 0) AS wins_projected,
 				COALESCE(s.losses_projected, 0) AS losses_projected,
 				p.over_selected, 
-				p.lock_selected 
+				p.lock_selected,
+				p.nosweat_lock_selected
 			FROM nbaoverunders.picks p
 			INNER JOIN teamseasons s ON p.teamseason_id = s.id
 			INNER JOIN teams t ON s.team_id = t.id
-			WHERE s.season_start_year = 2024
+			WHERE s.season_start_year = 2025
 		     AND p.entry = ? 
 			 ORDER BY t.teamname ASC;`
 
@@ -123,7 +126,7 @@ func (m *EntryModel) Get(id int) (Entry, error) {
 		// Use rows.Scan() to copy the values from each field in the row to the
 		// new Entry object that we created
 		// arguments to row.Scan() must be pointers to the place you want to copy the data into
-		err = pickrows.Scan(&pick.TeamSeasonID, &pick.TeamName, &pick.WinsActual, &pick.LossesActual, &pick.WinsLine, &pick.WinsProjected, &pick.LossesProjected, &pick.OverSelected, &pick.LockSelected)
+		err = pickrows.Scan(&pick.TeamSeasonID, &pick.TeamName, &pick.WinsActual, &pick.LossesActual, &pick.WinsLine, &pick.WinsProjected, &pick.LossesProjected, &pick.OverSelected, &pick.LockSelected, &pick.NosweatLockSelected)
 		if err != nil {
 			return Entry{}, err
 		}
@@ -133,13 +136,20 @@ func (m *EntryModel) Get(id int) (Entry, error) {
 			overUnderMultiplier = -1
 		}
 		lockMultiplier := 1
-		if pick.LockSelected {
+		if pick.LockSelected || pick.NosweatLockSelected {
 			lockMultiplier = 2
 		}
 		// Calculate the points based on the wins and losses, over/under selection, and lock
-		pick.Points = (float32(pick.WinsActual) - float32(pick.WinsLine)) * float32(overUnderMultiplier) * float32(lockMultiplier)
-		// Add the points to the total points
-		totalPoints += float64(pick.Points)
+		points := (float32(pick.WinsActual) - float32(pick.WinsLine)) * float32(overUnderMultiplier) * float32(lockMultiplier)
+
+		// Check if this is a no-sweat lock with negative points
+		if pick.NosweatLockSelected && points < 0 {
+			pick.Points = 0 // Display as 0 for nosweat lock with negative outcome
+			// Don't add to totalPoints
+		} else {
+			pick.Points = points           // Assign the calculated points
+			totalPoints += float64(points) // Add to total
+		}
 
 		// Append it to the slice of picks
 		picks = append(picks, pick)
@@ -181,7 +191,8 @@ func (m *EntryModel) Get(id int) (Entry, error) {
 // This will return the 10 most recently created entries.
 func (m *EntryModel) Latest() ([]Entry, error) {
 	stmt := `SELECT id, playername, points, year, created FROM nbaoverunders.entries
-	WHERE year >= 2024 ORDER BY points DESC LIMIT 20`
+	WHERE year = 2025 ORDER BY points DESC LIMIT 20`
+	// @TODO - year should be dynamic, defaulting to current year
 
 	// Query() method on the connection pool returns a sql.Rows resultset containing the query result
 	rows, err := m.DB.Query(stmt)
@@ -225,6 +236,8 @@ func (m *EntryModel) Latest() ([]Entry, error) {
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
+
+	// to add - subquery on picks to get the number of picks for each entry and lock
 
 	// If everything went OK then return the Entries slice
 	return entries, nil

@@ -32,7 +32,13 @@
 				<td>{{.WinsActual}} - {{.LossesActual}}</td>
 				<td>{{printf "%.1f" .WinsLine}}</td>
 				<td>{{if .OverSelected}}OVER{{else}}UNDER{{end}}</td>
-				<td>{{if .LockSelected}}LOCK{{end}}</td>
+				<td>
+					{{if .NosweatLockSelected}}
+						NO-SWEAT
+					{{else if .LockSelected}}
+						LOCK
+					{{end}}
+				</td>
 				<td>{{printf "%.1f" .Points}}</td>
 			</tr>
 			{{end}}

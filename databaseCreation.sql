@@ -17,19 +17,19 @@ CREATE INDEX idx_entries_created ON entries(created);
 -- Add some dummy records
 INSERT INTO entries (playername, year, points, created) VALUES (
 	'Brendan Heinz',
-	2024,
+	2025,
 	20.50,
 	UTC_TIMESTAMP()
 );
 INSERT INTO entries (playername, year, points, created) VALUES (
 	'Thomas Bruch',
-	2024,
+	2025,
 	17.00,
 	UTC_TIMESTAMP()
 );
 INSERT INTO entries (playername, year, points, created) VALUES (
 	'Andy Heinz',
-	2024,
+	2025,
 	23.50,
 	UTC_TIMESTAMP()
 );
