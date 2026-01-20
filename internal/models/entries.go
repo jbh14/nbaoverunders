@@ -142,7 +142,7 @@ func (m *EntryModel) Get(id int) (Entry, error) {
 		// Calculate the points based on the wins and losses, over/under selection, and lock
 		points := (float32(pick.WinsActual) - float32(pick.WinsLine)) * float32(overUnderMultiplier) * float32(lockMultiplier)
 
-		// Check if this is a no-sweat lock with negative points
+		// Check if this is a no-sweat lock with negative points - if so, set points to 0
 		if pick.NosweatLockSelected && points < 0 {
 			pick.Points = 0 // Display as 0 for nosweat lock with negative outcome
 			// Don't add to totalPoints
