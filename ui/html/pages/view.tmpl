@@ -8,7 +8,7 @@
 			<strong>{{.Year}}</strong>
 			<span>#{{.ID}}</span>
 		</div>
-		<pre><code>{{.Points}} Points{{if .Picks}} on {{len .Picks}} Picks {{end}}</code></pre>
+		<pre><code>{{printf "%.1f" .Points}} Points{{if .Picks}} on {{len .Picks}} Picks {{end}}</code></pre>
 
 		<!-- <div class='metadata'>
 			<time>Created: {{humanDate .Created}}</time>
@@ -31,7 +31,7 @@
 			<tr>
 				<td>{{.TeamName}}</td>
 				<td>{{.WinsActual}} - {{.LossesActual}}</td>
-				<td>{{if or .WinsProjected .LossesProjected}}{{.WinsProjected}} - {{.LossesProjected}}{{end}}</td>
+				<td>{{if or .WinsProjected .LossesProjected}}{{printf "%.1f" .WinsProjected}} - {{printf "%.1f" .LossesProjected}}{{end}}</td>
 				<td>{{printf "%.1f" .WinsLine}}</td>
 				<td>{{if .OverSelected}}OVER{{else}}UNDER{{end}}</td>
 				<td>

@@ -23,8 +23,8 @@ type Pick struct {
 	WinsActual          int
 	LossesActual        int
 	WinsLine            float64
-	WinsProjected       int
-	LossesProjected     int
+	WinsProjected       float64
+	LossesProjected     float64
 	OverSelected        bool
 	LockSelected        bool
 	NosweatLockSelected bool
@@ -107,10 +107,6 @@ func (m *EntryModel) Get(id int) (Entry, error) {
 	if err2 != nil {
 		return Entry{}, err2
 	}
-
-	if err2 != nil {
-		return Entry{}, err
-	}
 	defer pickrows.Close()
 
 	// empty slice to hold picks
@@ -123,9 +119,9 @@ func (m *EntryModel) Get(id int) (Entry, error) {
 		// Create a pointer to a new zeroed Pick struct.
 		var pick Pick
 
-		// Use sql.NullInt32 for projected wins/losses so we can detect NULL values.
-		var winsProjected sql.NullInt32
-		var lossesProjected sql.NullInt32
+		// Use sql.NullFloat64 for projected wins/losses so we can detect NULL values.
+		var winsProjected sql.NullFloat64
+		var lossesProjected sql.NullFloat64
 
 		// Use rows.Scan() to copy the values from each field in the row to the
 		// new Entry object that we created
@@ -148,10 +144,10 @@ func (m *EntryModel) Get(id int) (Entry, error) {
 
 		// Only set projected values if they are non-NULL in the database.
 		if winsProjected.Valid {
-			pick.WinsProjected = int(winsProjected.Int32)
+			pick.WinsProjected = winsProjected.Float64
 		}
 		if lossesProjected.Valid {
-			pick.LossesProjected = int(lossesProjected.Int32)
+			pick.LossesProjected = lossesProjected.Float64
 		}
 
 		// multiplier for over/under and lock

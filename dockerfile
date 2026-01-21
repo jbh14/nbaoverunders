@@ -38,5 +38,5 @@ EXPOSE 4000
 # Run the Go app
 CMD ["./nbaoverunders"]
 
-# docker build --platform linux/amd64 -t jbh14/nbaoverunders_amd:12 .
-# docker push jbh14/nbaoverunders_amd:12
+# docker build --platform linux/amd64 -t jbh14/nbaoverunders_amd:17 .
+# docker push jbh14/nbaoverunders_amd:17

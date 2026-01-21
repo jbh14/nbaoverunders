@@ -50,8 +50,8 @@ CREATE TABLE teamseasons (
 	losses_actual INTEGER,
 	wins_line DECIMAL(4,2),
 	losses_line DECIMAL(4,2),
-	wins_projected INTEGER,
-	losses_projected INTEGER,
+	wins_projected DECIMAL(4,2),
+	losses_projected DECIMAL(4,2),
 	projected_over BOOLEAN,
 	confirmed_over BOOLEAN,
     FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE
@@ -96,25 +96,25 @@ SELECT id, 2025 FROM teams;
 
 -- update Hawks season with wins and losses
 UPDATE teamseasons
-SET wins_actual = 36, losses_actual = 40, wins_line = 36.50
+SET wins_actual = 36, losses_actual = 40, wins_line = 36.50, wins_projected = 38.50, losses_projected = 43.50
 WHERE season_start_year = 2025
 AND team_id = (SELECT ID FROM teams WHERE teamname = 'Atlanta Hawks');
 
 -- update Cavs season with wins and losses
 UPDATE teamseasons
-SET wins_actual = 61, losses_actual = 15, wins_line = 48.50
+SET wins_actual = 61, losses_actual = 15, wins_line = 48.50, wins_projected = 55.50, losses_projected = 26.50
 WHERE season_start_year = 2025
 AND team_id = (SELECT ID FROM teams WHERE teamname = 'Cleveland Cavaliers');
 
 -- update Clippers season with wins and losses
 UPDATE teamseasons
-SET wins_actual = 44, losses_actual = 32, wins_line = 35.50
+SET wins_actual = 44, losses_actual = 32, wins_line = 35.50, wins_projected = 40.50, losses_projected = 41.50
 WHERE season_start_year = 2025
 AND team_id = (SELECT ID FROM teams WHERE teamname = 'Los Angeles Clippers');
 
 -- update Pacers season with wins and losses
 UPDATE teamseasons
-SET wins_actual = 45, losses_actual = 31, wins_line = 46.50
+SET wins_actual = 45, losses_actual = 31, wins_line = 46.50, wins_projected = 47.50, losses_projected = 34.50
 WHERE season_start_year = 2025
 AND team_id = (SELECT ID FROM teams WHERE teamname = 'Indiana Pacers');
 
@@ -133,35 +133,38 @@ CREATE TABLE picks (
 
 -- create a few "picks" entries here, but most will be added by the user
 -- Brendan over on the Hawks
-INSERT INTO picks (entry, teamseason_id, over_selected, lock_selected)
+INSERT INTO picks (entry, teamseason_id, over_selected, lock_selected, nosweat_lock_selected)
 SELECT 
     e.id, 
     ts.id, 
     TRUE, 
+    FALSE,
     FALSE
 FROM entries e
 JOIN teamseasons ts ON ts.team_id = (SELECT id FROM teams WHERE teamname = 'Atlanta Hawks') 
     AND ts.season_start_year = 2025
 WHERE e.playername = 'Brendan Heinz' AND e.year = 2025;
 
--- Brendan over on the Cavs
-INSERT INTO picks (entry, teamseason_id, over_selected, lock_selected)
+-- Brendan nosweat lock over on the Cavs
+INSERT INTO picks (entry, teamseason_id, over_selected, lock_selected, nosweat_lock_selected)
 SELECT 
     e.id, 
     ts.id, 
     TRUE, 
-    FALSE
+    FALSE,
+    TRUE
 FROM entries e
 JOIN teamseasons ts ON ts.team_id = (SELECT id FROM teams WHERE teamname = 'Cleveland Cavaliers') 
     AND ts.season_start_year = 2025
 WHERE e.playername = 'Brendan Heinz' AND e.year = 2025;
 
 -- Brendan under on the Clippers
-INSERT INTO picks (entry, teamseason_id, over_selected, lock_selected)
+INSERT INTO picks (entry, teamseason_id, over_selected, lock_selected, nosweat_lock_selected)
 SELECT 
     e.id, 
     ts.id, 
     FALSE, 
+    FALSE,
     FALSE
 FROM entries e
 JOIN teamseasons ts ON ts.team_id = (SELECT id FROM teams WHERE teamname = 'Los Angeles Clippers') 
@@ -169,12 +172,13 @@ JOIN teamseasons ts ON ts.team_id = (SELECT id FROM teams WHERE teamname = 'Los 
 WHERE e.playername = 'Brendan Heinz' AND e.year = 2025;
 
 -- Brendan lock over on the Pacers
-INSERT INTO picks (entry, teamseason_id, over_selected, lock_selected)
+INSERT INTO picks (entry, teamseason_id, over_selected, lock_selected, nosweat_lock_selected)
 SELECT 
     e.id, 
     ts.id, 
     TRUE, 
-    TRUE
+    TRUE,
+    FALSE
 FROM entries e
 JOIN teamseasons ts ON ts.team_id = (SELECT id FROM teams WHERE teamname = 'Indiana Pacers') 
     AND ts.season_start_year = 2025
