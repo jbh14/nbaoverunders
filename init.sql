@@ -18,19 +18,19 @@ CREATE INDEX idx_entries_created ON entries(created);
 -- Add some dummy records
 INSERT INTO entries (playername, year, points, created) VALUES (
 	'Brendan Heinz',
-	2024,
+	2025,
 	20.50,
 	UTC_TIMESTAMP()
 );
 INSERT INTO entries (playername, year, points, created) VALUES (
 	'Thomas Bruch',
-	2024,
+	2025,
 	17.00,
 	UTC_TIMESTAMP()
 );
 INSERT INTO entries (playername, year, points, created) VALUES (
 	'Andy Heinz',
-	2024,
+	2025,
 	23.50,
 	UTC_TIMESTAMP()
 );
@@ -57,7 +57,7 @@ CREATE TABLE teamseasons (
     FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE
 );
 
--- create team records and team seasons for all teams for 2024-2025 season
+-- create team records and team seasons for all teams for 2025-2026 season
 INSERT INTO teams (teamname) VALUES
     ('Atlanta Hawks'),
     ('Boston Celtics'),
@@ -90,32 +90,32 @@ INSERT INTO teams (teamname) VALUES
     ('Utah Jazz'),
     ('Washington Wizards');
 
--- Insert team seasons for the 2024-2025 season
+-- Insert team seasons for the 2025-2026 season
 INSERT INTO teamseasons (team_id, season_start_year)
-SELECT id, 2024 FROM teams;
+SELECT id, 2025 FROM teams;
 
 -- update Hawks season with wins and losses
 UPDATE teamseasons
 SET wins_actual = 36, losses_actual = 40, wins_line = 36.50
-WHERE season_start_year = 2024
+WHERE season_start_year = 2025
 AND team_id = (SELECT ID FROM teams WHERE teamname = 'Atlanta Hawks');
 
 -- update Cavs season with wins and losses
 UPDATE teamseasons
 SET wins_actual = 61, losses_actual = 15, wins_line = 48.50
-WHERE season_start_year = 2024
+WHERE season_start_year = 2025
 AND team_id = (SELECT ID FROM teams WHERE teamname = 'Cleveland Cavaliers');
 
 -- update Clippers season with wins and losses
 UPDATE teamseasons
 SET wins_actual = 44, losses_actual = 32, wins_line = 35.50
-WHERE season_start_year = 2024
+WHERE season_start_year = 2025
 AND team_id = (SELECT ID FROM teams WHERE teamname = 'Los Angeles Clippers');
 
 -- update Pacers season with wins and losses
 UPDATE teamseasons
 SET wins_actual = 45, losses_actual = 31, wins_line = 46.50
-WHERE season_start_year = 2024
+WHERE season_start_year = 2025
 AND team_id = (SELECT ID FROM teams WHERE teamname = 'Indiana Pacers');
 
 
@@ -141,8 +141,8 @@ SELECT
     FALSE
 FROM entries e
 JOIN teamseasons ts ON ts.team_id = (SELECT id FROM teams WHERE teamname = 'Atlanta Hawks') 
-    AND ts.season_start_year = 2024
-WHERE e.playername = 'Brendan Heinz' AND e.year = 2024;
+    AND ts.season_start_year = 2025
+WHERE e.playername = 'Brendan Heinz' AND e.year = 2025;
 
 -- Brendan over on the Cavs
 INSERT INTO picks (entry, teamseason_id, over_selected, lock_selected)
@@ -153,8 +153,8 @@ SELECT
     FALSE
 FROM entries e
 JOIN teamseasons ts ON ts.team_id = (SELECT id FROM teams WHERE teamname = 'Cleveland Cavaliers') 
-    AND ts.season_start_year = 2024
-WHERE e.playername = 'Brendan Heinz' AND e.year = 2024;
+    AND ts.season_start_year = 2025
+WHERE e.playername = 'Brendan Heinz' AND e.year = 2025;
 
 -- Brendan under on the Clippers
 INSERT INTO picks (entry, teamseason_id, over_selected, lock_selected)
@@ -165,8 +165,8 @@ SELECT
     FALSE
 FROM entries e
 JOIN teamseasons ts ON ts.team_id = (SELECT id FROM teams WHERE teamname = 'Los Angeles Clippers') 
-    AND ts.season_start_year = 2024
-WHERE e.playername = 'Brendan Heinz' AND e.year = 2024;
+    AND ts.season_start_year = 2025
+WHERE e.playername = 'Brendan Heinz' AND e.year = 2025;
 
 -- Brendan lock over on the Pacers
 INSERT INTO picks (entry, teamseason_id, over_selected, lock_selected)
@@ -177,5 +177,5 @@ SELECT
     TRUE
 FROM entries e
 JOIN teamseasons ts ON ts.team_id = (SELECT id FROM teams WHERE teamname = 'Indiana Pacers') 
-    AND ts.season_start_year = 2024
-WHERE e.playername = 'Brendan Heinz' AND e.year = 2024;
+    AND ts.season_start_year = 2025
+WHERE e.playername = 'Brendan Heinz' AND e.year = 2025;

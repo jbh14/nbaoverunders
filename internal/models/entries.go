@@ -90,9 +90,9 @@ func (m *EntryModel) Get(id int) (Entry, error) {
     			t.teamname, 
 				COALESCE(s.wins_actual, 0) AS wins_actual,
 				COALESCE(s.losses_actual, 0) AS losses_actual,
-				COALESCE(s.wins_line, 0) AS wins_line,
-				COALESCE(s.wins_projected, 0) AS wins_projected,
-				COALESCE(s.losses_projected, 0) AS losses_projected,
+				s.wins_line,
+				s.wins_projected,
+				s.losses_projected,
 				p.over_selected, 
 				p.lock_selected,
 				p.nosweat_lock_selected
@@ -123,13 +123,37 @@ func (m *EntryModel) Get(id int) (Entry, error) {
 		// Create a pointer to a new zeroed Pick struct.
 		var pick Pick
 
+		// Use sql.NullInt32 for projected wins/losses so we can detect NULL values.
+		var winsProjected sql.NullInt32
+		var lossesProjected sql.NullInt32
+
 		// Use rows.Scan() to copy the values from each field in the row to the
 		// new Entry object that we created
 		// arguments to row.Scan() must be pointers to the place you want to copy the data into
-		err = pickrows.Scan(&pick.TeamSeasonID, &pick.TeamName, &pick.WinsActual, &pick.LossesActual, &pick.WinsLine, &pick.WinsProjected, &pick.LossesProjected, &pick.OverSelected, &pick.LockSelected, &pick.NosweatLockSelected)
+		err = pickrows.Scan(
+			&pick.TeamSeasonID,
+			&pick.TeamName,
+			&pick.WinsActual,
+			&pick.LossesActual,
+			&pick.WinsLine,
+			&winsProjected,
+			&lossesProjected,
+			&pick.OverSelected,
+			&pick.LockSelected,
+			&pick.NosweatLockSelected,
+		)
 		if err != nil {
 			return Entry{}, err
 		}
+
+		// Only set projected values if they are non-NULL in the database.
+		if winsProjected.Valid {
+			pick.WinsProjected = int(winsProjected.Int32)
+		}
+		if lossesProjected.Valid {
+			pick.LossesProjected = int(lossesProjected.Int32)
+		}
+
 		// multiplier for over/under and lock
 		overUnderMultiplier := 1
 		if !pick.OverSelected {
@@ -139,8 +163,20 @@ func (m *EntryModel) Get(id int) (Entry, error) {
 		if pick.LockSelected || pick.NosweatLockSelected {
 			lockMultiplier = 2
 		}
-		// Calculate the points based on the wins and losses, over/under selection, and lock
-		points := (float32(pick.WinsActual) - float32(pick.WinsLine)) * float32(overUnderMultiplier) * float32(lockMultiplier)
+
+		// Decide whether to use actual or projected wins for points calculation.
+		// If total games played (wins + losses) is less than 82 AND both projected
+		// wins and losses are non-NULL, use WinsProjected instead of WinsActual.
+		totalGamesPlayed := pick.WinsActual + pick.LossesActual
+		useProjected := totalGamesPlayed < 82 && winsProjected.Valid && lossesProjected.Valid
+
+		baseWins := float32(pick.WinsActual)
+		if useProjected {
+			baseWins = float32(pick.WinsProjected)
+		}
+
+		// Calculate the points based on the chosen wins value, over/under selection, and lock
+		points := (baseWins - float32(pick.WinsLine)) * float32(overUnderMultiplier) * float32(lockMultiplier)
 
 		// Check if this is a no-sweat lock with negative points - if so, set points to 0
 		if pick.NosweatLockSelected && points < 0 {
